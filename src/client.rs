@@ -1,4 +1,5 @@
 use reqwest;
+use crate::models::Channel;
 use crate::error::{KickApiError, Result};
 
 const KICK_BASE_URL: &str = "https://kick.com/api/v2";
@@ -18,14 +19,12 @@ impl KickApiClient {
         }
     }
 
-    pub async fn get_channel(&self, channel_slug: &str) -> Result<String> {
+    pub async fn get_channel(&self, channel_slug: &str) -> Result<Channel> {
         let url = format!("{}/channels/{}", self.base_url, channel_slug);
-
         let response = self.client.get(&url).send().await?;
-
         if response.status().is_success() {
-            let body = response.text().await?;
-            Ok(body)
+            let channel = response.json::<Channel>().await?;
+            Ok(channel)
         } else {
             Err(KickApiError::ApiError(format!(
                 "Failed to get channel: {}",
