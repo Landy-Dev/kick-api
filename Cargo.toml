@@ -6,6 +6,12 @@ edition = "2024"
 [dependencies]
 # HTTP client - async, with JSON support
 reqwest = { version = "0.12", features = ["json"] }
+# For logging HTTP requests
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# For local OAuth callback server
+warp = "0.3"
 
 # Async runtime
 tokio = { version = "1", features = ["full"] }
@@ -19,3 +25,5 @@ thiserror = "2"
 
 # Optional: for OAuth/URLs
 url = "2"
+dotenvy = "0.15.7"
+oauth2 = "4.4"
