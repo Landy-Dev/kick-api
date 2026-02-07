@@ -56,7 +56,7 @@ impl<'a> EventsApi<'a> {
             request = request.query(&[("broadcaster_user_id", id)]);
         }
 
-        let response = request.send().await?;
+        let response = crate::http::send_with_retry(self.client, request).await?;
 
         if response.status().is_success() {
             let body = response.text().await?;
@@ -102,14 +102,13 @@ impl<'a> EventsApi<'a> {
         self.require_token()?;
 
         let url = format!("{}/events/subscriptions", self.base_url);
-        let response = self
+        let request = self
             .client
             .post(&url)
             .header("Accept", "*/*")
             .bearer_auth(self.token.as_ref().unwrap())
-            .json(&request)
-            .send()
-            .await?;
+            .json(&request);
+        let response = crate::http::send_with_retry(self.client, request).await?;
 
         if response.status().is_success() {
             let body = response.text().await?;
@@ -145,14 +144,13 @@ impl<'a> EventsApi<'a> {
         let url = format!("{}/events/subscriptions", self.base_url);
         let id_pairs: Vec<(&str, &str)> = ids.iter().map(|id| ("id", id.as_str())).collect();
 
-        let response = self
+        let request = self
             .client
             .delete(&url)
             .header("Accept", "*/*")
             .bearer_auth(self.token.as_ref().unwrap())
-            .query(&id_pairs)
-            .send()
-            .await?;
+            .query(&id_pairs);
+        let response = crate::http::send_with_retry(self.client, request).await?;
 
         if response.status().is_success() {
             Ok(())

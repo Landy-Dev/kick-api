@@ -55,7 +55,7 @@ impl<'a> UsersApi<'a> {
             }
         }
 
-        let response = request.send().await?;
+        let response = crate::http::send_with_retry(self.client, request).await?;
         self.parse_response(response).await
     }
 
@@ -110,13 +110,12 @@ impl<'a> UsersApi<'a> {
         self.require_token()?;
 
         let url = format!("{}/token/introspect", self.base_url);
-        let response = self
+        let request = self
             .client
             .post(&url)
             .header("Accept", "*/*")
-            .bearer_auth(self.token.as_ref().unwrap())
-            .send()
-            .await?;
+            .bearer_auth(self.token.as_ref().unwrap());
+        let response = crate::http::send_with_retry(self.client, request).await?;
 
         if response.status().is_success() {
             let body = response.text().await?;

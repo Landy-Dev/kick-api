@@ -49,14 +49,13 @@ impl<'a> ModerationApi<'a> {
         self.require_token()?;
 
         let url = format!("{}/moderation/bans", self.base_url);
-        let response = self
+        let request = self
             .client
             .post(&url)
             .header("Accept", "*/*")
             .bearer_auth(self.token.as_ref().unwrap())
-            .json(&request)
-            .send()
-            .await?;
+            .json(&request);
+        let response = crate::http::send_with_retry(self.client, request).await?;
 
         if response.status().is_success() {
             Ok(())
@@ -86,14 +85,13 @@ impl<'a> ModerationApi<'a> {
         self.require_token()?;
 
         let url = format!("{}/moderation/bans", self.base_url);
-        let response = self
+        let request = self
             .client
             .delete(&url)
             .header("Accept", "*/*")
             .bearer_auth(self.token.as_ref().unwrap())
-            .json(&request)
-            .send()
-            .await?;
+            .json(&request);
+        let response = crate::http::send_with_retry(self.client, request).await?;
 
         if response.status().is_success() {
             Ok(())

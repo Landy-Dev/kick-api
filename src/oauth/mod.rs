@@ -50,11 +50,6 @@ impl KickOAuth {
             return Err("One or more OAuth credentials are empty!".into());
         }
 
-        println!("✓ Loaded credentials:");
-        println!("  Client ID: {}... ({} chars)", &client_id[..10.min(client_id.len())], client_id.len());
-        println!("  Client Secret: {}... ({} chars)", &client_secret[..5.min(client_secret.len())], client_secret.len());
-        println!("  Redirect URI: {}", redirect_uri);
-
         // Kick's OAuth endpoints
         let auth_url = AuthUrl::new("https://id.kick.com/oauth/authorize".to_string())?;
         let token_url = TokenUrl::new("https://id.kick.com/oauth/token".to_string())?;

@@ -41,13 +41,12 @@ impl<'a> RewardsApi<'a> {
         self.require_token()?;
 
         let url = format!("{}/channels/rewards", self.base_url);
-        let response = self
+        let request = self
             .client
             .get(&url)
             .header("Accept", "*/*")
-            .bearer_auth(self.token.as_ref().unwrap())
-            .send()
-            .await?;
+            .bearer_auth(self.token.as_ref().unwrap());
+        let response = crate::http::send_with_retry(self.client, request).await?;
 
         self.parse_response(response).await
     }
@@ -74,14 +73,13 @@ impl<'a> RewardsApi<'a> {
         self.require_token()?;
 
         let url = format!("{}/channels/rewards", self.base_url);
-        let response = self
+        let request = self
             .client
             .post(&url)
             .header("Accept", "*/*")
             .bearer_auth(self.token.as_ref().unwrap())
-            .json(&request)
-            .send()
-            .await?;
+            .json(&request);
+        let response = crate::http::send_with_retry(self.client, request).await?;
 
         self.parse_single_response(response).await
     }
@@ -110,14 +108,13 @@ impl<'a> RewardsApi<'a> {
         self.require_token()?;
 
         let url = format!("{}/channels/rewards/{}", self.base_url, reward_id);
-        let response = self
+        let request = self
             .client
             .patch(&url)
             .header("Accept", "*/*")
             .bearer_auth(self.token.as_ref().unwrap())
-            .json(&request)
-            .send()
-            .await?;
+            .json(&request);
+        let response = crate::http::send_with_retry(self.client, request).await?;
 
         self.parse_single_response(response).await
     }
@@ -129,13 +126,12 @@ impl<'a> RewardsApi<'a> {
         self.require_token()?;
 
         let url = format!("{}/channels/rewards/{}", self.base_url, reward_id);
-        let response = self
+        let request = self
             .client
             .delete(&url)
             .header("Accept", "*/*")
-            .bearer_auth(self.token.as_ref().unwrap())
-            .send()
-            .await?;
+            .bearer_auth(self.token.as_ref().unwrap());
+        let response = crate::http::send_with_retry(self.client, request).await?;
 
         if response.status().is_success() {
             Ok(())
@@ -181,7 +177,7 @@ impl<'a> RewardsApi<'a> {
             request = request.query(&[("status", status_str)]);
         }
 
-        let response = request.send().await?;
+        let response = crate::http::send_with_retry(self.client, request).await?;
         self.parse_response(response).await
     }
 
@@ -280,14 +276,13 @@ impl<'a> RewardsApi<'a> {
         let url = format!("{}/channels/rewards/redemptions/{}", self.base_url, action);
         let request_body = ManageRedemptionsRequest { ids: redemption_ids };
 
-        let response = self
+        let request = self
             .client
             .post(&url)
             .header("Accept", "*/*")
             .bearer_auth(self.token.as_ref().unwrap())
-            .json(&request_body)
-            .send()
-            .await?;
+            .json(&request_body);
+        let response = crate::http::send_with_retry(self.client, request).await?;
 
         if response.status().is_success() {
             let body = response.text().await?;

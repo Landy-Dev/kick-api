@@ -49,7 +49,7 @@ impl<'a> ChannelsApi<'a> {
             ));
         }
 
-        let response = request.send().await?;
+        let response = crate::http::send_with_retry(self.client, request).await?;
         if response.status().is_success() {
             let body = response.text().await?;
 
@@ -97,7 +97,7 @@ impl<'a> ChannelsApi<'a> {
             ));
         }
 
-        let response = request.send().await?;
+        let response = crate::http::send_with_retry(self.client, request).await?;
         if response.status().is_success() {
             let body = response.text().await?;
 
