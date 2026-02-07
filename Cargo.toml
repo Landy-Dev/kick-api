@@ -2,28 +2,24 @@
 name = "kick-api"
 version = "0.1.0"
 edition = "2024"
+description = "Rust client for the Kick.com API"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/WhoTookLandy/kick-api"
+keywords = ["kick", "api", "streaming"]
+categories = ["api-bindings"]
 
 [dependencies]
-# HTTP client - async, with JSON support
 reqwest = { version = "0.12", features = ["json"] }
-# For logging HTTP requests
+tokio = { version = "1", features = ["time"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+url = "2"
+oauth2 = "4.4"
+
+[dev-dependencies]
+dotenvy = "0.15.7"
 tracing = "0.1"
 tracing-subscriber = "0.3"
-
-# For local OAuth callback server
 warp = "0.3"
-
-# Async runtime
 tokio = { version = "1", features = ["full"] }
-
-# Serialization/deserialization
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.149"
-
-# Error handling
-thiserror = "2"
-
-# Optional: for OAuth/URLs
-url = "2"
-dotenvy = "0.15.7"
-oauth2 = "4.4"
