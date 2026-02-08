@@ -2,7 +2,7 @@
 
 Rust client for the [Kick.com API](https://kick.com).
 
-Covers channels, users, chat, moderation, rewards, and event subscriptions. Handles OAuth authentication and automatic retry on rate limits (429).
+Covers channels, users, chat, moderation, rewards, event subscriptions, and **live chat over WebSocket**. Handles OAuth authentication and automatic retry on rate limits (429).
 
 ## Installation
 
@@ -12,7 +12,30 @@ kick-api = "0.1"
 tokio = { version = "1", features = ["full"] }
 ```
 
-## Usage
+## Live Chat (WebSocket)
+
+Read live chat messages from any channel in real time — no authentication required.
+
+```rust
+use kick_api::LiveChatClient;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut chat = LiveChatClient::connect(27670567).await?;
+
+    while let Some(msg) = chat.next_message().await? {
+        println!("{}: {}", msg.sender.username, msg.content);
+    }
+
+    Ok(())
+}
+```
+
+**Finding a chatroom ID:** Visit `https://kick.com/api/v2/channels/{slug}` in your browser and search for `"chatroom":{"id":`. The Kick website API is behind Cloudflare, so this must be done from a browser.
+
+Use `next_event()` instead of `next_message()` to receive all Pusher events (subscriptions, bans, polls, etc.).
+
+## REST API
 
 ```rust
 use kick_api::KickApiClient;
@@ -47,6 +70,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 | Module | Endpoints |
 |--------|-----------|
+| **Live Chat** | Real-time chat messages via Pusher WebSocket (no auth) |
 | **Channels** | Get by slug, get own channels |
 | **Users** | Get by ID, get authenticated user, token introspection |
 | **Chat** | Send message, delete message |
