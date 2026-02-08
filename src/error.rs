@@ -16,6 +16,9 @@ pub enum KickApiError {
 
     #[error("Unexpected error: {0}")]
     UnexpectedError(String),
+
+    #[error("WebSocket error: {0}")]
+    WebSocketError(#[from] tokio_tungstenite::tungstenite::Error),
 }
 
 pub type Result<T> = std::result::Result<T, KickApiError>;

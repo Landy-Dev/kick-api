@@ -16,6 +16,8 @@ serde_json = "1"
 thiserror = "2"
 url = "2"
 oauth2 = "4.4"
+tokio-tungstenite = { version = "0.26", features = ["native-tls"] }
+futures-util = "0.3"
 
 [dev-dependencies]
 dotenvy = "0.15.7"
