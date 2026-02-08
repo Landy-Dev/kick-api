@@ -43,7 +43,7 @@ impl<'a> ChatApi<'a> {
     /// println!("Message sent: {}", response.message_id);
     /// ```
     pub async fn send_message(&self, request: SendMessageRequest) -> Result<SendMessageResponse> {
-        self.require_token()?;
+        super::require_token(self.token)?;
 
         let url = format!("{}/chat", self.base_url);
         let request = self
@@ -83,7 +83,7 @@ impl<'a> ChatApi<'a> {
     /// client.chat().delete_message("message_id_here").await?;
     /// ```
     pub async fn delete_message(&self, message_id: &str) -> Result<()> {
-        self.require_token()?;
+        super::require_token(self.token)?;
 
         let url = format!("{}/chat/{}", self.base_url, message_id);
         let request = self
@@ -103,12 +103,4 @@ impl<'a> ChatApi<'a> {
         }
     }
 
-    fn require_token(&self) -> Result<()> {
-        if self.token.is_none() {
-            return Err(KickApiError::ApiError(
-                "OAuth token required for this endpoint".to_string(),
-            ));
-        }
-        Ok(())
-    }
 }

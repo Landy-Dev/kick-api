@@ -46,7 +46,7 @@ impl<'a> ModerationApi<'a> {
     /// client.moderation().ban(request).await?;
     /// ```
     pub async fn ban(&self, request: BanRequest) -> Result<()> {
-        self.require_token()?;
+        super::require_token(self.token)?;
 
         let url = format!("{}/moderation/bans", self.base_url);
         let request = self
@@ -82,7 +82,7 @@ impl<'a> ModerationApi<'a> {
     /// client.moderation().unban(request).await?;
     /// ```
     pub async fn unban(&self, request: UnbanRequest) -> Result<()> {
-        self.require_token()?;
+        super::require_token(self.token)?;
 
         let url = format!("{}/moderation/bans", self.base_url);
         let request = self
@@ -103,12 +103,4 @@ impl<'a> ModerationApi<'a> {
         }
     }
 
-    fn require_token(&self) -> Result<()> {
-        if self.token.is_none() {
-            return Err(KickApiError::ApiError(
-                "OAuth token required for this endpoint".to_string(),
-            ));
-        }
-        Ok(())
-    }
 }

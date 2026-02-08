@@ -29,7 +29,7 @@ pub struct EventSubscription {
 }
 
 /// A single event to subscribe to
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SubscribeEvent {
     /// Event type name (e.g., "chat.message.created")
     pub name: String,
@@ -53,7 +53,7 @@ pub struct SubscribeEvent {
 ///     ],
 /// };
 /// ```
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SubscribeRequest {
     /// The broadcaster to subscribe to events for
     #[serde(skip_serializing_if = "Option::is_none")]

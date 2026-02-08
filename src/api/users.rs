@@ -38,7 +38,7 @@ impl<'a> UsersApi<'a> {
     /// let me = client.users().get_me().await?;
     /// ```
     pub async fn get(&self, user_ids: Vec<u64>) -> Result<Vec<User>> {
-        self.require_token()?;
+        super::require_token(self.token)?;
 
         let url = format!("{}/users", self.base_url);
         let mut request = self
@@ -107,7 +107,7 @@ impl<'a> UsersApi<'a> {
     /// }
     /// ```
     pub async fn introspect_token(&self) -> Result<TokenIntrospection> {
-        self.require_token()?;
+        super::require_token(self.token)?;
 
         let url = format!("{}/token/introspect", self.base_url);
         let request = self
@@ -138,15 +138,6 @@ impl<'a> UsersApi<'a> {
     }
 
     // Helper methods
-
-    fn require_token(&self) -> Result<()> {
-        if self.token.is_none() {
-            return Err(KickApiError::ApiError(
-                "OAuth token required for this endpoint".to_string(),
-            ));
-        }
-        Ok(())
-    }
 
     async fn parse_response<T: serde::de::DeserializeOwned>(
         &self,

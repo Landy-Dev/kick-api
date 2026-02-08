@@ -87,15 +87,14 @@ impl TokenIntrospection {
 
     /// Check if the token is expired
     pub fn is_expired(&self) -> bool {
-        if let Some(exp) = self.exp {
-            let now = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap()
-                .as_secs() as i64;
-            now >= exp
-        } else {
-            false
-        }
+        let Some(exp) = self.exp else {
+            return false;
+        };
+        let Ok(duration) = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH)
+        else {
+            return false;
+        };
+        duration.as_secs() as i64 >= exp
     }
 }
 

@@ -18,6 +18,7 @@ const KICK_BASE_URL: &str = "https://api.kick.com/public/v1";
 /// let channel = client.channels().get("xqc").await?;
 /// let rewards = client.rewards().get_all().await?;
 /// ```
+#[derive(Debug, Clone)]
 pub struct KickApiClient {
     base_url: String,
     client: reqwest::Client,

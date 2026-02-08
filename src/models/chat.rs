@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 ///     reply_to_message_id: None,
 /// };
 /// ```
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SendMessageRequest {
     /// Message type (e.g., "user")
     pub r#type: String,

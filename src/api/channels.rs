@@ -33,21 +33,15 @@ impl<'a> ChannelsApi<'a> {
     /// println!("Channel: {}", channel.slug);
     /// ```
     pub async fn get(&self, channel_slug: &str) -> Result<Channel> {
-        let url = format!("{}/channels", self.base_url);
+        super::require_token(self.token)?;
 
-        let mut request = self
+        let url = format!("{}/channels", self.base_url);
+        let request = self
             .client
             .get(&url)
             .header("Accept", "*/*")
-            .query(&[("slug", channel_slug)]);
-
-        if let Some(token) = self.token {
-            request = request.bearer_auth(token);
-        } else {
-            return Err(KickApiError::ApiError(
-                "OAuth token required for this endpoint".to_string(),
-            ));
-        }
+            .query(&[("slug", channel_slug)])
+            .bearer_auth(self.token.as_ref().unwrap());
 
         let response = crate::http::send_with_retry(self.client, request).await?;
         if response.status().is_success() {
@@ -85,17 +79,14 @@ impl<'a> ChannelsApi<'a> {
     /// }
     /// ```
     pub async fn get_mine(&self) -> Result<Vec<Channel>> {
+        super::require_token(self.token)?;
+
         let url = format!("{}/channels", self.base_url);
-
-        let mut request = self.client.get(&url).header("Accept", "*/*");
-
-        if let Some(token) = self.token {
-            request = request.bearer_auth(token);
-        } else {
-            return Err(KickApiError::ApiError(
-                "OAuth token required for this endpoint".to_string(),
-            ));
-        }
+        let request = self
+            .client
+            .get(&url)
+            .header("Accept", "*/*")
+            .bearer_auth(self.token.as_ref().unwrap());
 
         let response = crate::http::send_with_retry(self.client, request).await?;
         if response.status().is_success() {

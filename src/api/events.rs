@@ -43,7 +43,7 @@ impl<'a> EventsApi<'a> {
         &self,
         broadcaster_user_id: Option<u64>,
     ) -> Result<Vec<EventSubscription>> {
-        self.require_token()?;
+        super::require_token(self.token)?;
 
         let url = format!("{}/events/subscriptions", self.base_url);
         let mut request = self
@@ -99,7 +99,7 @@ impl<'a> EventsApi<'a> {
         &self,
         request: SubscribeRequest,
     ) -> Result<Vec<SubscribeResult>> {
-        self.require_token()?;
+        super::require_token(self.token)?;
 
         let url = format!("{}/events/subscriptions", self.base_url);
         let request = self
@@ -139,7 +139,7 @@ impl<'a> EventsApi<'a> {
     /// client.events().unsubscribe(vec!["sub_id_1".to_string(), "sub_id_2".to_string()]).await?;
     /// ```
     pub async fn unsubscribe(&self, ids: Vec<String>) -> Result<()> {
-        self.require_token()?;
+        super::require_token(self.token)?;
 
         let url = format!("{}/events/subscriptions", self.base_url);
         let id_pairs: Vec<(&str, &str)> = ids.iter().map(|id| ("id", id.as_str())).collect();
@@ -162,12 +162,4 @@ impl<'a> EventsApi<'a> {
         }
     }
 
-    fn require_token(&self) -> Result<()> {
-        if self.token.is_none() {
-            return Err(KickApiError::ApiError(
-                "OAuth token required for this endpoint".to_string(),
-            ));
-        }
-        Ok(())
-    }
 }

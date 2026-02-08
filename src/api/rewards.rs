@@ -38,7 +38,7 @@ impl<'a> RewardsApi<'a> {
     /// }
     /// ```
     pub async fn get_all(&self) -> Result<Vec<ChannelReward>> {
-        self.require_token()?;
+        super::require_token(self.token)?;
 
         let url = format!("{}/channels/rewards", self.base_url);
         let request = self
@@ -70,7 +70,7 @@ impl<'a> RewardsApi<'a> {
     /// let reward = client.rewards().create(request).await?;
     /// ```
     pub async fn create(&self, request: CreateRewardRequest) -> Result<ChannelReward> {
-        self.require_token()?;
+        super::require_token(self.token)?;
 
         let url = format!("{}/channels/rewards", self.base_url);
         let request = self
@@ -105,7 +105,7 @@ impl<'a> RewardsApi<'a> {
         reward_id: &str,
         request: UpdateRewardRequest,
     ) -> Result<ChannelReward> {
-        self.require_token()?;
+        super::require_token(self.token)?;
 
         let url = format!("{}/channels/rewards/{}", self.base_url, reward_id);
         let request = self
@@ -123,7 +123,7 @@ impl<'a> RewardsApi<'a> {
     ///
     /// Requires OAuth token with `channel:rewards:write` scope
     pub async fn delete(&self, reward_id: &str) -> Result<()> {
-        self.require_token()?;
+        super::require_token(self.token)?;
 
         let url = format!("{}/channels/rewards/{}", self.base_url, reward_id);
         let request = self
@@ -155,7 +155,7 @@ impl<'a> RewardsApi<'a> {
         reward_id: Option<&str>,
         status: Option<RedemptionStatus>,
     ) -> Result<Vec<ChannelRewardRedemption>> {
-        self.require_token()?;
+        super::require_token(self.token)?;
 
         let url = format!("{}/channels/rewards/redemptions", self.base_url);
         let mut request = self
@@ -208,15 +208,6 @@ impl<'a> RewardsApi<'a> {
     }
 
     // Helper methods
-
-    fn require_token(&self) -> Result<()> {
-        if self.token.is_none() {
-            return Err(KickApiError::ApiError(
-                "OAuth token required for this endpoint".to_string(),
-            ));
-        }
-        Ok(())
-    }
 
     async fn parse_response<T: serde::de::DeserializeOwned>(
         &self,
@@ -271,7 +262,7 @@ impl<'a> RewardsApi<'a> {
         action: &str,
         redemption_ids: Vec<String>,
     ) -> Result<ManageRedemptionsResponse> {
-        self.require_token()?;
+        super::require_token(self.token)?;
 
         let url = format!("{}/channels/rewards/redemptions/{}", self.base_url, action);
         let request_body = ManageRedemptionsRequest { ids: redemption_ids };

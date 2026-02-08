@@ -37,7 +37,7 @@ pub struct ChannelReward {
 }
 
 /// Request body for creating a new reward
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateRewardRequest {
     pub title: String,
     pub cost: u32,
@@ -116,7 +116,7 @@ pub struct RedemptionUser {
 }
 
 /// Redemption status
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum RedemptionStatus {
     Pending,
@@ -135,7 +135,7 @@ pub struct FailedRedemption {
 }
 
 /// Reasons why a redemption operation failed
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum FailureReason {
     Unknown,
@@ -145,7 +145,7 @@ pub enum FailureReason {
 }
 
 /// Request body for accepting/rejecting redemptions
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ManageRedemptionsRequest {
     /// Redemption IDs (1-25 ULIDs)
     pub ids: Vec<String>,

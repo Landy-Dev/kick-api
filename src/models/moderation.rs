@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 /// Request body for banning a user
 ///
@@ -25,7 +25,7 @@ use serde::Serialize;
 ///     duration: Some(600),
 /// };
 /// ```
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BanRequest {
     /// The broadcaster's channel where the ban applies
     pub broadcaster_user_id: u64,
@@ -53,7 +53,7 @@ pub struct BanRequest {
 ///     user_id: 67890,
 /// };
 /// ```
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UnbanRequest {
     /// The broadcaster's channel where the unban applies
     pub broadcaster_user_id: u64,

@@ -31,7 +31,11 @@ pub(crate) async fn send_with_retry(
             tokio::time::sleep(Duration::from_secs(retry_after)).await;
 
             // Use the cloned request for the next attempt
-            current = next.expect("request should be cloneable for retry");
+            current = next.ok_or_else(|| {
+                crate::error::KickApiError::UnexpectedError(
+                    "request could not be cloned for retry".to_string(),
+                )
+            })?;
         } else {
             return Ok(response);
         }
