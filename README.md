@@ -114,14 +114,23 @@ use kick_api::fetch_followed_channels;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let token = "your_session_token_from_browser";
-    let channels = fetch_followed_channels(token).await?;
+    let resp = fetch_followed_channels(token).await?;
 
-    for ch in &channels {
-        let status = match &ch.livestream {
-            Some(stream) if stream.is_live => format!("LIVE ({} viewers)", stream.viewer_count),
-            _ => "Offline".to_string(),
-        };
-        println!("{}: {}", ch.slug, status);
+    println!("Following {} channels:", resp.channels.len());
+    for ch in &resp.channels {
+        let name = ch.user_username.as_deref().unwrap_or("?");
+        if ch.is_live {
+            println!("  {} — LIVE ({} viewers) — {}",
+                name, ch.viewer_count,
+                ch.session_title.as_deref().unwrap_or(""));
+        } else {
+            println!("  {} — Offline", name);
+        }
+    }
+
+    // Paginate with next_cursor
+    if let Some(cursor) = resp.next_cursor {
+        println!("Next page cursor: {}", cursor);
     }
     Ok(())
 }
@@ -153,7 +162,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 |----------|:---:|-------------|
 | `LiveChatClient` | None | Real-time chat messages via Pusher WebSocket |
 | `fetch_channel_info` | None | Chatroom settings, subscriber badges, livestream status |
-| `fetch_followed_channels` | Session token | Channels the authenticated user follows |
+| `fetch_followed_channels` | Session token | Paginated list of followed channels (`FollowedChannelsResponse`) |
 
 ### OAuth Scopes
 

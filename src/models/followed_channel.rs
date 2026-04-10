@@ -1,129 +1,57 @@
 use serde::Deserialize;
 
+/// Paginated response from the followed channels endpoint.
+///
+/// **⚠️ Unofficial API** — This uses Kick's internal v2 API, not the public
+/// API. It may break without notice.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FollowedChannelsResponse {
+    /// Cursor for fetching the next page. `None` when there are no more results.
+    #[serde(default)]
+    pub next_cursor: Option<u64>,
+
+    /// The list of followed channels.
+    #[serde(default)]
+    pub channels: Vec<FollowedChannel>,
+}
+
 /// A followed channel from Kick's unofficial v2 API.
 ///
-/// Returned by [`fetch_followed_channels`](crate::fetch_followed_channels).
-/// Contains channel info, user profile, and livestream status for channels
-/// the authenticated user follows.
+/// Returned inside [`FollowedChannelsResponse`] by
+/// [`fetch_followed_channels`](crate::fetch_followed_channels).
 ///
 /// **⚠️ Unofficial API** — This uses Kick's internal v2 API, not the public
 /// API. It may break without notice.
 #[derive(Debug, Clone, Deserialize)]
 pub struct FollowedChannel {
-    /// Channel ID
-    pub id: u64,
-
-    /// User ID of the broadcaster
-    pub user_id: u64,
-
-    /// Channel URL slug
-    pub slug: String,
-
-    /// Whether the channel is banned
-    #[serde(default)]
-    pub is_banned: bool,
-
-    /// Whether VODs are enabled
-    #[serde(default)]
-    pub vod_enabled: bool,
-
-    /// Whether subscriptions are enabled
-    #[serde(default)]
-    pub subscription_enabled: bool,
-
-    /// Whether the channel is a Kick affiliate
-    #[serde(default)]
-    pub is_affiliate: bool,
-
-    /// Whether the channel is verified
-    #[serde(default)]
-    pub verified: bool,
-
-    /// Number of followers
-    #[serde(default)]
-    pub followers_count: u64,
-
-    /// Whether the channel can host other channels
-    #[serde(default)]
-    pub can_host: bool,
-
-    /// Broadcaster's user profile
-    #[serde(default)]
-    pub user: Option<FollowedChannelUser>,
-
-    /// Current livestream info (None if offline)
-    #[serde(default)]
-    pub livestream: Option<FollowedChannelLivestream>,
-}
-
-/// User profile within a followed channel response.
-#[derive(Debug, Clone, Deserialize)]
-pub struct FollowedChannelUser {
-    /// User ID
-    pub id: u64,
-
-    /// Display username
-    pub username: String,
-
-    /// User bio/description
-    #[serde(default)]
-    pub bio: Option<String>,
-
-    /// Profile picture URL
-    #[serde(default)]
-    pub profile_pic: Option<String>,
-}
-
-/// Livestream info within a followed channel response.
-#[derive(Debug, Clone, Deserialize)]
-pub struct FollowedChannelLivestream {
-    /// Livestream ID
-    pub id: u64,
-
-    /// Channel ID
-    #[serde(default)]
-    pub channel_id: Option<u64>,
-
-    /// Stream title
-    #[serde(default)]
-    pub session_title: Option<String>,
-
-    /// Whether the stream is currently live
+    /// Whether the channel is currently live
     #[serde(default)]
     pub is_live: bool,
 
-    /// Whether the stream is marked as mature
+    /// Profile picture URL
     #[serde(default)]
-    pub is_mature: bool,
+    pub profile_picture: Option<String>,
 
-    /// Stream language
+    /// Channel URL slug (lowercase)
     #[serde(default)]
-    pub language: Option<String>,
+    pub channel_slug: Option<String>,
 
-    /// Current viewer count
+    /// Current viewer count (0 if offline)
     #[serde(default)]
     pub viewer_count: u64,
 
-    /// When the stream started (ISO 8601)
+    /// Category name (e.g. "Just Chatting", "IRL"). Empty string if offline.
     #[serde(default)]
-    pub start_time: Option<String>,
+    pub category_name: Option<String>,
 
-    /// Stream categories
+    /// Display username
     #[serde(default)]
-    pub categories: Vec<FollowedChannelCategory>,
-}
+    pub user_username: Option<String>,
 
-/// Category within a followed channel livestream.
-#[derive(Debug, Clone, Deserialize)]
-pub struct FollowedChannelCategory {
-    /// Category ID
-    pub id: u64,
-
-    /// Category name
-    pub name: String,
-
-    /// Category URL slug
-    pub slug: String,
+    /// Current stream title (`None` if offline)
+    #[serde(default)]
+    pub session_title: Option<String>,
 }
 
 #[cfg(test)]
@@ -131,111 +59,69 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_deserialize_followed_channels() {
-        let json = r##"[
-            {
-                "id": 44192640,
-                "user_id": 45297540,
-                "slug": "hello_kiko",
-                "is_banned": false,
-                "vod_enabled": true,
-                "subscription_enabled": true,
-                "is_affiliate": true,
-                "verified": true,
-                "followers_count": 8393,
-                "can_host": true,
-                "user": {
-                    "id": 45297540,
-                    "username": "hello_kiko",
-                    "bio": "Hi I'm Kiko",
-                    "profile_pic": "https://files.kick.com/images/user/45297540/profile_image.webp"
-                },
-                "livestream": {
-                    "id": 103692434,
-                    "channel_id": 44192640,
-                    "session_title": "Just Chatting stream!",
+    fn test_deserialize_followed_channels_response() {
+        let json = r##"{
+            "nextCursor": 5,
+            "channels": [
+                {
                     "is_live": true,
-                    "is_mature": false,
-                    "language": "English",
-                    "viewer_count": 99,
-                    "start_time": "2026-04-06 05:03:57",
-                    "categories": [
-                        {
-                            "id": 15,
-                            "name": "Just Chatting",
-                            "slug": "just-chatting"
-                        }
-                    ]
-                }
-            },
-            {
-                "id": 12345,
-                "user_id": 67890,
-                "slug": "offline_streamer",
-                "is_banned": false,
-                "verified": false,
-                "followers_count": 500,
-                "user": {
-                    "id": 67890,
-                    "username": "offline_streamer"
+                    "profile_picture": "https://files.kick.com/images/user/57253/profile_image/thumb.webp",
+                    "channel_slug": "knut",
+                    "viewer_count": 151,
+                    "category_name": "IRL",
+                    "user_username": "Knut",
+                    "session_title": "NPC Show + Iron World Fit Week expo"
                 },
-                "livestream": null
-            }
-        ]"##;
+                {
+                    "is_live": false,
+                    "profile_picture": "https://files.kick.com/images/user/73899717/profile_image/thumb.webp",
+                    "channel_slug": "anxstasia",
+                    "viewer_count": 0,
+                    "category_name": "",
+                    "user_username": "anxstasia",
+                    "session_title": null
+                }
+            ]
+        }"##;
 
-        let channels: Vec<FollowedChannel> = serde_json::from_str(json).unwrap();
+        let resp: FollowedChannelsResponse = serde_json::from_str(json).unwrap();
 
-        assert_eq!(channels.len(), 2);
+        assert_eq!(resp.next_cursor, Some(5));
+        assert_eq!(resp.channels.len(), 2);
 
-        // First channel — live
-        let ch = &channels[0];
-        assert_eq!(ch.id, 44192640);
-        assert_eq!(ch.slug, "hello_kiko");
-        assert!(ch.verified);
-        assert!(ch.is_affiliate);
-        assert_eq!(ch.followers_count, 8393);
+        // Live channel
+        let ch = &resp.channels[0];
+        assert!(ch.is_live);
+        assert_eq!(ch.channel_slug, Some("knut".into()));
+        assert_eq!(ch.viewer_count, 151);
+        assert_eq!(ch.category_name, Some("IRL".into()));
+        assert_eq!(ch.user_username, Some("Knut".into()));
+        assert!(ch.session_title.is_some());
+        assert!(ch.profile_picture.is_some());
 
-        let user = ch.user.as_ref().unwrap();
-        assert_eq!(user.username, "hello_kiko");
-        assert_eq!(user.bio, Some("Hi I'm Kiko".into()));
-        assert!(user.profile_pic.is_some());
-
-        let stream = ch.livestream.as_ref().unwrap();
-        assert!(stream.is_live);
-        assert_eq!(stream.viewer_count, 99);
-        assert_eq!(stream.session_title, Some("Just Chatting stream!".into()));
-        assert_eq!(stream.categories.len(), 1);
-        assert_eq!(stream.categories[0].name, "Just Chatting");
-
-        // Second channel — offline
-        let ch2 = &channels[1];
-        assert_eq!(ch2.slug, "offline_streamer");
-        assert!(!ch2.verified);
-        assert!(ch2.livestream.is_none());
+        // Offline channel
+        let ch2 = &resp.channels[1];
+        assert!(!ch2.is_live);
+        assert_eq!(ch2.channel_slug, Some("anxstasia".into()));
+        assert_eq!(ch2.viewer_count, 0);
+        assert!(ch2.session_title.is_none());
     }
 
     #[test]
-    fn test_deserialize_empty_followed_list() {
-        let json = "[]";
-        let channels: Vec<FollowedChannel> = serde_json::from_str(json).unwrap();
-        assert!(channels.is_empty());
+    fn test_deserialize_empty_followed_response() {
+        let json = r##"{"nextCursor": null, "channels": []}"##;
+        let resp: FollowedChannelsResponse = serde_json::from_str(json).unwrap();
+        assert!(resp.next_cursor.is_none());
+        assert!(resp.channels.is_empty());
     }
 
     #[test]
     fn test_deserialize_minimal_followed_channel() {
-        let json = r##"[{
-            "id": 1,
-            "user_id": 2,
-            "slug": "test"
-        }]"##;
-
-        let channels: Vec<FollowedChannel> = serde_json::from_str(json).unwrap();
-        assert_eq!(channels.len(), 1);
-        assert_eq!(channels[0].slug, "test");
-        assert!(!channels[0].is_banned);
-        assert!(!channels[0].verified);
-        assert_eq!(channels[0].followers_count, 0);
-        assert!(channels[0].user.is_none());
-        assert!(channels[0].livestream.is_none());
+        let json = r##"{"channels": [{"is_live": false}]}"##;
+        let resp: FollowedChannelsResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(resp.channels.len(), 1);
+        assert!(!resp.channels[0].is_live);
+        assert!(resp.channels[0].channel_slug.is_none());
+        assert_eq!(resp.channels[0].viewer_count, 0);
     }
 }

@@ -3,7 +3,7 @@ use tokio_tungstenite::{connect_async, tungstenite::Message};
 
 use crate::error::{KickApiError, Result};
 use crate::models::ChannelInfo;
-use crate::models::FollowedChannel;
+use crate::models::FollowedChannelsResponse;
 use crate::models::live_chat::{LiveChatMessage, PusherEvent, PusherMessage};
 
 const PUSHER_URL: &str = "wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0&flash=false";
@@ -272,18 +272,20 @@ pub async fn fetch_channel_info(username: &str) -> Result<ChannelInfo> {
 ///
 /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
 /// let token = "your_session_token";
-/// let channels = fetch_followed_channels(token).await?;
-/// for ch in &channels {
-///     let status = match &ch.livestream {
-///         Some(stream) if stream.is_live => format!("🔴 {} viewers", stream.viewer_count),
-///         _ => "Offline".to_string(),
+/// let resp = fetch_followed_channels(token).await?;
+/// for ch in &resp.channels {
+///     let status = if ch.is_live {
+///         format!("LIVE ({} viewers)", ch.viewer_count)
+///     } else {
+///         "Offline".to_string()
 ///     };
-///     println!("{}: {}", ch.slug, status);
+///     println!("{}: {}",
+///         ch.user_username.as_deref().unwrap_or("?"), status);
 /// }
 /// # Ok(())
 /// # }
 /// ```
-pub async fn fetch_followed_channels(token: &str) -> Result<Vec<FollowedChannel>> {
+pub async fn fetch_followed_channels(token: &str) -> Result<FollowedChannelsResponse> {
     let url = "https://kick.com/api/v2/channels/followed";
     let auth_header = format!("Bearer {}", token);
 
@@ -318,12 +320,12 @@ pub async fn fetch_followed_channels(token: &str) -> Result<Vec<FollowedChannel>
         )));
     }
 
-    let channels: Vec<FollowedChannel> = serde_json::from_slice(&output.stdout)
+    let resp: FollowedChannelsResponse = serde_json::from_slice(&output.stdout)
         .map_err(|e| KickApiError::ApiError(format!(
             "Failed to parse followed channels response: {}", e
         )))?;
 
-    Ok(channels)
+    Ok(resp)
 }
 
 async fn fetch_channel_info_inner(username: &str) -> Result<ChannelInfo> {

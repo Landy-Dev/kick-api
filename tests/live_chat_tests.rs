@@ -230,38 +230,38 @@ async fn test_fetch_followed_channels() {
     let token = std::env::var("KICK_SESSION_TOKEN")
         .expect("KICK_SESSION_TOKEN env var required for this test");
 
-    let channels = fetch_followed_channels(&token)
+    let resp = fetch_followed_channels(&token)
         .await
         .expect("Should fetch followed channels");
 
-    println!("Following {} channels:", channels.len());
-    for ch in &channels {
-        let status = match &ch.livestream {
-            Some(stream) if stream.is_live => {
-                format!(
-                    "LIVE — {} ({} viewers)",
-                    stream.session_title.as_deref().unwrap_or("(no title)"),
-                    stream.viewer_count,
-                )
-            }
-            _ => "Offline".to_string(),
+    println!("Following {} channels (nextCursor: {:?}):", resp.channels.len(), resp.next_cursor);
+    for ch in &resp.channels {
+        let status = if ch.is_live {
+            format!(
+                "LIVE — {} ({} viewers)",
+                ch.session_title.as_deref().unwrap_or("(no title)"),
+                ch.viewer_count,
+            )
+        } else {
+            "Offline".to_string()
         };
         println!(
-            "  {} (ID: {}, followers: {}) — {}",
-            ch.slug, ch.id, ch.followers_count, status,
+            "  {} [{}] — {}",
+            ch.user_username.as_deref().unwrap_or("?"),
+            ch.channel_slug.as_deref().unwrap_or("?"),
+            status,
         );
     }
 
     // Basic assertions — if we got here the API call and deserialization worked
     // The user should be following at least one channel for a meaningful test
     assert!(
-        !channels.is_empty(),
+        !resp.channels.is_empty(),
         "Expected at least one followed channel (is the session token valid?)"
     );
 
-    let first = &channels[0];
-    assert!(first.id > 0);
-    assert!(!first.slug.is_empty());
+    let first = &resp.channels[0];
+    assert!(first.channel_slug.is_some());
 }
 
 /// Integration test: verify ping keeps the connection alive.

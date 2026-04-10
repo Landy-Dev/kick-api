@@ -62,7 +62,7 @@
 //! |----------|------|-------------|
 //! | [`LiveChatClient`] | None | Real-time chat via Pusher WebSocket |
 //! | [`fetch_channel_info`] | None | Chatroom settings, badges, livestream status |
-//! | [`fetch_followed_channels`] | Session token | Channels the authenticated user follows |
+//! | [`fetch_followed_channels`] | Session token | Paginated list of followed channels ([`FollowedChannelsResponse`]) |
 //!
 //! ```no_run
 //! use kick_api::{fetch_channel_info, fetch_followed_channels};
@@ -73,9 +73,10 @@
 //! println!("Chatroom ID: {}", info.chatroom.id);
 //!
 //! // Requires session token (from browser cookies, not an OAuth app token)
-//! let followed = fetch_followed_channels("your_session_token").await?;
-//! for ch in &followed {
-//!     println!("{}", ch.slug);
+//! let resp = fetch_followed_channels("your_session_token").await?;
+//! for ch in &resp.channels {
+//!     println!("{}: {} viewers",
+//!         ch.user_username.as_deref().unwrap_or("?"), ch.viewer_count);
 //! }
 //! # Ok(())
 //! # }
